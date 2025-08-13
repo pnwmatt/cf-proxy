@@ -11,9 +11,6 @@ jobs:
       deployments: write
     steps:
       - uses: actions/checkout@v4
-      - name: "check is NTFY_TOPIC exists"
-        env: 
-          ntfy_topic: ${{ secrets.NTFY_TOPIC }}
       - name: Set Wrangler Secret
         uses: cloudflare/wrangler-action@v3
         with:
