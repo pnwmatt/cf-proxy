@@ -35,7 +35,7 @@ jobs:
             -d "All systems go!" \
             ntfy.sh/${{ secrets.NTFY_TOPIC }}
       - name: Notify on Failure
-        if: ${{ failure() && github.ref == 'refs/heads/main' && secrets.NTFY_TOPIC  }}
+        if: ${{ failure() && github.ref == 'refs/heads/main' && ${{ secrets.NTFY_TOPIC }} }}
         run: |
           curl \
             -H "Title: cf-proxy deploy failure!" \
