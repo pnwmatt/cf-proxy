@@ -11,6 +11,9 @@ jobs:
       deployments: write
     steps:
       - uses: actions/checkout@v4
+      - name: "check is NTFY_TOPIC exists"
+        env: 
+          ntfy_topic: ${{ secrets.NTFY_TOPIC }}
       - name: Set Wrangler Secret
         uses: cloudflare/wrangler-action@v3
         with:
@@ -27,19 +30,23 @@ jobs:
           accountId: ${{ secrets.CF_ACCOUNT_ID }}
           command: --cwd worker/ deploy
       - name: Notify on Success
-        if: ${{ success() && github.ref == 'refs/heads/main' && secrets.NTFY_TOPIC }}
+        env: 
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        if: ${{ success() && github.ref == 'refs/heads/main' && env.NTFY_TOPIC != '' }}
         run: |
           curl \
             -H "Title: cf-proxy deploy success" \
             -H "Tags: success,checkmark" \
             -d "All systems go!" \
-            ntfy.sh/${{ secrets.NTFY_TOPIC }}
+            ntfy.sh/${{ env.NTFY_TOPIC }}
       - name: Notify on Failure
-        if: ${{ failure() && github.ref == 'refs/heads/main' && ${{ secrets.NTFY_TOPIC }} }}
+        env: 
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+        if: ${{ failure() && github.ref == 'refs/heads/main' && env.NTFY_TOPIC != '' }}
         run: |
           curl \
             -H "Title: cf-proxy deploy failure!" \
             -H "Priority: urgent" \
             -H "Tags: warning,skull" \
             -d "Ruhroh..." \
-            ntfy.sh/${{ secrets.NTFY_TOPIC }}
+            ntfy.sh/${{ env.NTFY_TOPIC }}
