@@ -1,8 +1,12 @@
 import { connect } from 'cloudflare:sockets';
 
 export default {
-    async fetch(request) {
-        const TOKEN = '<YOUR-AUTH-TOKEN>'
+    async fetch(request, env) {
+        const TOKEN = env.PROXY_TOKEN;
+
+        if (!TOKEN) {
+            return new Response('Server configuration error', { status: 500 });
+        }
 
         if (request.headers.get('Authorization') !== TOKEN)
             return new Response('Unauthorized', { status: 401 });

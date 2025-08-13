@@ -1,0 +1,45 @@
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-2204-arm64-4x
+    name: Deploy
+    permissions:
+      contents: read
+      deployments: write
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set Wrangler Secret
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_DEPLOY_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          command: --cwd worker/ secret put PROXY_TOKEN
+        env:
+          WRANGLER_INPUT: ${{ secrets.PROXY_TOKEN }}
+      - name: Deploy
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CF_DEPLOY_TOKEN }}
+          accountId: ${{ secrets.CF_ACCOUNT_ID }}
+          command: --cwd worker/ deploy
+      - name: Notify on Success
+        if: ${{ success() && github.ref == 'refs/heads/main' && secrets.NTFY_TOPIC }}
+        run: |
+          curl \
+            -H "Title: cf-proxy deploy success" \
+            -H "Tags: success,checkmark" \
+            -d "All systems go!" \
+            ntfy.sh/${{ secrets.NTFY_TOPIC }}
+      - name: Notify on Failure
+        if: ${{ failure() && github.ref == 'refs/heads/main' && secrets.NTFY_TOPIC  }}
+        run: |
+          curl \
+            -H "Title: cf-proxy deploy failure!" \
+            -H "Priority: urgent" \
+            -H "Tags: warning,skull" \
+            -d "Ruhroh..." \
+            ntfy.sh/${{ secrets.NTFY_TOPIC }}

@@ -1,5 +1,7 @@
 # cf-proxy
 
+> Forked with gratitude from [LvMalware/cf-proxy](https://github.com/LvMalware/cf-proxy)
+
 > Proxy requests through Cloudflare (CF) workers
 
 A simple worker that acts as proxy to tunnel requests over the internet, forwarding them through Cloudflare's global 
@@ -7,7 +9,25 @@ network of servers. This way, we can archieve automatic IP address rotation, all
 (as CF is used by a huge number of websites, their ASNs are usually whitelisted 
 on firewalls :stuck_out_tongue_winking_eye:).
 
-## Usage
+## Server Usage
+
+1. Fork this project to your own github
+2. Create a Cloudflare API Token with the following permissions:
+   - Workers Agents Configuration (edit)
+3. Create a random PROXY_TOKEN to authenticate proxy requests: `openssl rand -hex 24`
+4. Store both the Cloudflare API Token and PROXY_TOKEN in your Password Manager
+5. Optional: Use [ntfy.sh](https://ntfy.sh) for free to get success/failure deploy messages
+6. Set up Github Actions Repository Secrets: [https://github.com/YOURGITHUBUSERNAME/cf-proxy/settings/secrets/actions/new](https://github.com/YOURGITHUBUSERNAME/cf-proxy/settings/secrets/actions/new)
+   - CF_DEPLOY_TOKEN
+   - CF_ACCOUNT_ID (36 hex code found in your dash.cloudflare.com url)
+   - PROXY_TOKEN
+   - NTFY_TOPIC (optional)
+
+  (Remember: your NTFY topic is unsecured: anyone can read anything you post there)
+
+
+
+## Client Usage
 
 You will need [bun](https://bun.sh/) to run the client script `proxy.js`. You can install it by running:
 
@@ -45,7 +65,6 @@ Just change the TOKEN constant value:
 ```javascript
 5   const TOKEN = '<YOUR-AUTH-TOKEN>'
 ```
-
 
 Now, you can deploy the worker with (on `worker/`)
 ```bash
